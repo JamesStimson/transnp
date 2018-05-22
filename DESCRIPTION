@@ -14,3 +14,5 @@ RoxygenNote: 6.0.1
 Suggests: knitr,
     rmarkdown
 VignetteBuilder: knitr
+URL: https://github.com/JamesStimson/transnp
+BugReports: https://github.com/JamesStimson/transnp/issues
