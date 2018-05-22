@@ -1,0 +1,16 @@
+Package: transnp
+Type: Package
+Title: Transmission inference using SNP data 
+Version: 0.1.0
+Author: James Stimson
+Maintainer: James Stimson <james.stimson16@imperial.ac.uk>
+Description: Conduct transmission inference using SNP data from whole genome sequencing.
+    Takes SNP alignments for clusters, together with sampling dates and some assumptions, and models transmission events and times.
+License: GPL-3
+Imports: ape, phangorn, TransPhylo, visNetwork, treedater, phytools, gridExtra, purrr, ggplot2 
+Encoding: UTF-8
+LazyData: true
+RoxygenNote: 6.0.1
+Suggests: knitr,
+    rmarkdown
+VignetteBuilder: knitr

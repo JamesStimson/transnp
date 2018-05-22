@@ -1,0 +1,220 @@
+---
+title: "TB transmission modelling using clusters with *transnp*"
+author: "James Stimson, Yuanwei Xu, Caroline Colijn"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  quiet = TRUE,
+  progress = FALSE,
+  comment = "#>",
+  fig.width=6,
+  fig.height=4
+)
+```
+
+```{r global_opts, echo=FALSE}
+options(readr.show_progress = FALSE)
+```
+
+# Package Introduction
+
+>  *transnp*: Takes SNP alignments for clusters, together with sampling dates and some assumptions, and models transmission events and times. 
+
+## Functionality
+
+> The available functions in *transnp* are:
+
+**addAlignment**: add to a list of alignments from fasta files.
+
+**setUpDates**: create list of dates to match alignments.
+
+**createMLTrees**: creates a list of maximum likelihood estimated trees from a list of alignments. Uses *phangorn* and *phytools*.
+
+**createTimedTrees**: creates a list of timed trees from a list of trees and their sample dates. Uses *treedater*.
+
+**infer_multiTTree_shareParam**: creates a set of transmission trees which are jointly inferred from timed trees. Uses *TransPhylo*.
+
+**networkTPlot**: makes dynamic plot of a *TransPhylo* transmission tree showing unsampled cases.
+
+**plot_gen_times**: plot histogram of generation times for each cluster.
+
+**plot_times_to_samp**: plot histogram of times to sampling for each cluster.
+
+**plot_unsmapled_cases**: plot histogram of the number of unsampled cases for each cluster.
+
+> Load packages:
+
+```{r, message=FALSE,results="hide"}
+library(transnp)
+library(ape)
+library(phangorn)
+library(TransPhylo)
+library(treedater)
+library(phytools)
+library(gridExtra)
+library(purrr)
+library(ggplot2)
+```
+<br>
+
+## Step 1: read in the data
+
+> We start with a fasta format file containing aligned sequence data. 
+
+> Read the fasta files
+
+```{r}
+aligns <- list()
+aligns <- addAlignment(aligns, "valencia_cluster_CL001.fas")
+aligns <- addAlignment(aligns, "valencia_cluster_CL002.fas")
+aligns <- addAlignment(aligns, "valencia_cluster_CL005.fas")
+aligns <- addAlignment(aligns, "valencia_cluster_CL007.fas")
+```
+
+> This gives a list containing the alignments we will model: 
+
+```{r}
+aligns[[1]]
+```
+
+## Step 2: create timed phylogenetic trees 
+
+> 2a: Create the maximum likelihood trees (in this case using TB base frequencies)
+
+```{r, results='hide'}
+basefreqs <- c(0.1719, 0.3286, 0.3276, 0.1719)
+set.seed(12345)
+mltrees <- createMLTrees(aligns, bf=basefreqs)
+# Alternatively, mltrees=lapply(aligns, function(x) estimate.tree(x, bf = basefreqs, maxit=10000,optQ=TRUE, optNni=TRUE))
+par(mfrow=c(2,2)); lapply(mltrees,function(tree) {plot(tree); add.scale.bar()}); par(mfrow=c(1,1))
+# Improvement to do: coerce plots to increase height and width to show labels better
+```
+
+```{r}
+mltrees[[1]]
+```
+
+> 2b: Using sample dates, create timed trees using *treedater*.
+
+```{r, warning = FALSE, messages=FALSE}
+allDates <- read.csv(system.file("extdata", "valencia_dates.csv", package = "transnp", mustWork = TRUE))
+sampledates <- setUpDates(aligns, allDates)
+timedtrees <- createTimedTrees(mltrees, sampledates, aligns, strictClock = T, meanRateLimits = c(0.3, 0.7))
+```
+
+> Note: results depend on the clock assumptions and can affect onward analysis (long time vs short time). We are working towards incorporating this uncertainty. 
+
+## Step 3: transmission modelling 
+
+> Infer transmission trees using *TransPhylo* functionality 
+> This jointly estimates parameters over the trees, sharing parameters among the clusters
+> We analyse different clusters together
+
+```{r,quiet=TRUE,results="hide"}
+nIter <- 1000
+tpTimedTrees <- list()
+# Convert trees from phylo to TransPhylo format
+#for (i in seq(length(timedtrees))){
+#  tpTimedTrees[[i]] <- ptreeFromPhylo(timedtrees[[i]], max(sampledates[[i]]))
+#}
+maxDate <- max(unlist(lapply(sampledates, function(dateList) {return(max(dateList))})))
+tpTimedTrees <- lapply(timedtrees, function(tree) {return(ptreeFromPhylo(tree, maxDate))}) 
+
+record <- infer_multiTTree_shareParam(tpTimedTrees, share=c("neg","off.r","off.p","pi"), mcmcIterations=nIter, startNeg=1, startOff.p = 0.8, startOff.r = 1, startPi=0.9, updateNeg = T, updatePi = F, updateOff.p=FALSE)
+```
+
+> The result is a list of records, one for each cluster. The `record` object contains the inferred transmission trees. 
+
+## Step 4: Explore the results
+
+### Transmission trees
+
+> *Combined tree using TransPhylo*. In this tree, each colour corresponds to a host. Colours that don't end up at a tip represent inferred unsampled cases. Note that this Bayesian analysis produces a collection of possible transmission trees. Here we show the one with highest posterior probability, for cluster 4. 
+
+```{r}
+maptree <- selectTTree(record[[4]],burnin = 0.3)
+plotCTree(record[[4]][[maptree]]$ctree)
+```
+
+> Plot of the maximum posterior probability transmission tree; we use *visNetwork* for the visualisation.
+
+```{r}
+library(visNetwork)
+networkTPlot(record[[4]], mcmcIndex=nIter-10, missLabel="Missed", colours=c('lightblue', 'orange'))
+```
+
+> The thicker edges have higher probability - these transmission events are more certain. Here, there is a fairly high probability that G108 infected G260. We do not have a likely infector for G1350. 
+
+
+> Here is a different plot, for Cluster 2, showing different colour options. 
+
+```{r}
+networkTPlot(record[[2]], mcmcIndex=nIter, missLabel="Missed", colours=c('blue', 'orange'))
+```
+
+### How do the clusters compare to each other? 
+
+> We can plot distribution of generation times (one infection to the next) from the posterior.
+
+```{r}
+names(record) = c("Cluster1", "Cluster2", "Cluster5", "Cluster7")
+plot_gen_times(record)
+```
+
+> Clusters 1 and 5 contain some long times, suggesting cases that could have been intermittently infectious or non-infectious for a longer period. Cluster 2 seems to be moving faster. 
+
+
+> Times from getting infected to getting sampled, showing differences between clusters
+
+```{r}
+plot_times_to_samp(record)
+```
+
+> The same pattern is mirrored in the times to sampling
+
+> How many unsampled cases are estimated in the clusters? 
+
+```{r}
+plot_unsampled_cases(record)
+```
+
+> Higher numbers in clusters 1 and 5 reflect longer branches and fewer intermediate cases 
+
+
+
+### Individual-level estimes and uncertainty 
+
+> We can also extract individual-level infection times by case, for each cluster: 
+
+```{r}
+gt11=getInfectionTimes(record[[1]][300:1000],7)
+name1=record[[1]][[1000]]$ctree$nam[7]
+hist(gt11,breaks=15,xlab = paste("estimated time of infection for", name1),main = "")
+```
+
+> The timing of infection depends on who infected whom and on the timed tree.   
+  
+```{r}
+maptree1=selectTTree(record[[1]],burnin = 0.5)
+plotCTree(record[[1]][[maptree1]]$ctree)
+```
+
+## Acknowledgements
+> Centre for Mathematics of Precision Healthcare, Imperial College London
+
+> EPSRC Impact Acceleration award, Imperial College London
+
+> Inaki Comas and Tom Irving: TB cluster data from Valencia, Spain 
+
+## Notes
+
+transnp is work-in-progress^[On github soon!].
+
