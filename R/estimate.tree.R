@@ -130,51 +130,45 @@ estimate.tree <- function(aln,maxit=10000,addCols=TRUE, optNni=TRUE, bf=basefreq
   return(tree)
 }
 
-# notes:
-# JS see ?plot.outbreaker_chains for clues to outbreaker graphs
-# methods("plot")
-# getAnywhere(plot.outbreaker_chains)
-# labels1 <- labels(dist.dna(alignment1, model="N"))
+#' Simultaneously infer transmission trees given phylogenetic trees constructed from clusters of sequences.
+#' Wrapper for infer_multiTTree_shareParam, taking mean and std deviations rather than shape and scale for the Gamma parameters
+#' @param ptree_lst List of phylogenetic tree
+#' @param mean_gen Mean of the Gamma probability density function representing the generation time
+#' @param stddev_gen Standard deviation of the Gamma probability density function representing the generation time
+#' @param mean_sample Mean of the Gamma probability density function representing the sampling time
+#' @param stddev_sample Standard deviation of the Gamma probability density function representing the sampling time
+#' @param mcmcIterations Number of MCMC iterations to run the algorithm for
+#' @param thinning MCMC thinning interval between two sampled iterations
+#' @param startNeg Starting value of within-host coalescent parameter Ne*g
+#' @param startOff.r Starting value of parameter off.r
+#' @param startOff.p Starting value of parameter off.p
+#' @param startPi Starting value of sampling proportion pi
+#' @param updateNeg Whether of not to update the parameter Ne*g
+#' @param updateOff.r Whether or not to update the parameter off.r
+#' @param updateOff.p Whether or not to update the parameter off.p
+#' @param updatePi Whether or not to update the parameter pi
+#' @param share Character vector of parameters to be shared. For example, share = c("off.r", "off.p") would
+#' share the offspring distribution. Allowed parameter names are "neg", "off.r", "off.p" and "pi".
+#' @param startCTree_lst Optional combined list of trees to start from
+#' @param updateTTree Whether or not to update the transmission tree
+#' @param optiStart Whether or not to optimise the MCMC start point
+#' @param dateT Date when process stops (this can be Inf for fully simulated outbreaks)
+#' @return posterior sample set of transmission trees for all clusters
+#' @export
+simulTransTrees = function(timedTrees, mean_gen=1, stddev_gen=1, mean_sample=1, stddev_sample=1,
+                           share=c("neg","off.r","off.p","pi"), mcmcIterations=nIter, startNeg=1, startOff.p = 0.8, startOff.r = 1, startPi=0.9, updateNeg = T, updatePi = F, updateOff.p=FALSE){
 
-# --extra pars as (...) will get passed in to pml.
-# --for now i have not elected to optimise the base frequencies
-# (optBf), the rate matrix (optQ), the gamma parameter (optGamma) etc. We could revisit this
-# -- pml doesn't have the Stamatakis model for the number of constant sites. This will
-# affect branch lengths, I believe, broadly by some scaling factor.
+  # mean is shape*scale, st dev is sqrt(shape)*scale, so:
+  shape_gen <- (mean_gen/stddev_gen)^2
+  scale_gen <- (stddev_gen^2)/mean_gen
+  shape_sample <- (mean_sample/stddev_sample)^2
+  scale_sample <- (stddev_sample^2)/mean_sample
 
-# I had the error described here https://github.com/KlausVigo/phangorn/issues/32
-# and solved it by reinstalling Rcpp, quadprog, and phangorn and restarting R.
-# good thing Thibaut was out there 6 months ago solving this ...
+  record <- infer_multiTTree_shareParam(timedTrees, share=share, w.shape=shape_gen, w.scale=scale_gen, ws.shape=shape_sample, ws.scale=scale_sample,
+                                        mcmcIterations=mcmcIterations, startNeg=startNeg, startOff.p = startOff.p, startOff.r = startOff.r, startPi=startPi, updateNeg=updateNeg, updatePi=updatePi, updateOff.p=updateOff.p)
+  return(record)
+}
 
-
-#COMMENT OUT FOR PACKAGE# aln=read.dna("run_alignment_CL01.fas",format="fasta")
-#COMMENT OUT FOR PACKAGE# basefreqs=c(758,1449,1444,758); basefreqs=basefreqs/sum(basefreqs) # TB; A C G T
-
-
-#COMMENT OUT FOR PACKAGE# test=estimate.tree(aln)
-#COMMENT OUT FOR PACKAGE# plot(test)
-
- # system("raxml-ng --msa Valencia/clusters_alignments_valencia/run_alignment_CL01.fas --model GTR+ASC_STAM{758/1449/1444/758} --threads 1 --prefix clus01test")
-#COMMENT OUT FOR PACKAGE#  raxtree=read.tree("CL001.raxml.bestTree")
-#COMMENT OUT FOR PACKAGE# plot(raxtree)
-#COMMENT OUT FOR PACKAGE# par(mfrow=c(1,2)); plot(test); plot(raxtree)
-# yes, they are the same in structure (except that Inaki's alignment has the MLRA that he guessed, so my
-# tree has one additional tip.
-
-# Yaunwei's data
-#COMMENT OUT FOR PACKAGE# yxdata <- readRDS("cls_record_g1.rds")
-#COMMENT OUT FOR PACKAGE# yxdata$CL002[[1]]
-# same as yxdata[[1]][[1]]
-# plotCTree(record$ctree)
-# ttree <- extractTTree(record$ctree)
-# plotTTree(ttree=ttree,1,1)
-
-# timedtrees <- readRDS("cls_timetree.rds")
-# plot(timedtrees[[13]])
-
-# http://blog.phytools.org/2015/10/blog-post.html for untangle fix
-
-# Yuanwei's' multi-tree function added 09/05/2018
 #' Simultaneously infer transmission trees given phylogenetic trees constructed from clusters of sequences.
 #' User can specify any parameter(s) to be shared by providing a character vector of parameter names to
 #' the argument "share".

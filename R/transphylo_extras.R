@@ -119,10 +119,30 @@ plot_gen_times <- function(cls_record, ...){
 #' @param ctree TransPhylo tree
 #' @return A vector of posterior times to sampling
 #' @examples
-#' getTimesToSampling(ttree)
+#' getTimesToSampling(ctree)
 getTimesToSampling <-  function(ctree) { tt=extractTTree(ctree)$ttree;
 ns=sum(!is.na(tt[,2]))
 return(tt[1:ns,2]-tt[1:ns,1])
+}
+
+#' Get infection dates
+#' @param ctree TransPhylo tree
+#' @return A vector of posterior infection dates
+#' @examples
+#' getInfectionDates(ctree)
+getInfectionDates <-  function(ctree) { tt=extractTTree(ctree)$ttree;
+ns=sum(!is.na(tt[,2]))
+return(tt[1:ns,1])
+}
+
+plotInfectionDateDensity <- function(singleRecord, index, overlayDate){
+  dateList <- lapply(1:length(singleRecord), function(x) {
+    info <- getInfectionDates(singleRecord[[x]]$ctree)[[index]]
+    return(info)
+  })
+  d <- density(as.numeric(dateList))
+  plot(d)
+  abline(v=overlayDate, col='red', lwd=2)
 }
 
 #' Plot histogram of times to sampling for each cluster
