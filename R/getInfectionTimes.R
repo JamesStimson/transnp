@@ -15,3 +15,20 @@ getInfectionTimes <- function(record,k) {
 }
 
 
+#' Filter record on specified directed transmission pair
+#' @param record MCMC output produced by inferTTree
+#' @param from from case index
+#' @param to to case index
+#' @return Filtered record
+filterTransPair <- function(record, from, to){
+  rList <- list()
+  count = 0
+  for  (entry in record){
+    tt <- extractTTree(entry$ctree)
+    if (tt$ttree[to,3] == from){
+      count = count + 1
+      rList[[count]] <- entry
+    }
+  }
+  return(rList)
+}
