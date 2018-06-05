@@ -50,8 +50,41 @@ getTTreeDistInfo <- function(record,skipnum=1) {
   return(matList)
 }
 
+#' Plot transmission tree with posterior probabilities at or above given cutoff
+#' @param record  MCMC output produced by inferTTree
+#' @param cutoff  Minimum distance to be included
+#' @param burnin Proportion of record entries to use
+plotTransTreeSummary <- function(record, cutoff=1, burnin=0.5, nodeColour='lightblue', fontSize=24, edgeWidth=1) {
+  tt <- extractTTree(record[[1]]$ctree)
+  numSampled <- length(tt$nam)
+  numElements <- length(record)
 
-#' dynamic plot of the transmission network with edges weighted according  to likelihood of transmission
+  # Who-infected-who matrix from TransPhylo
+  myMat <- computeMatWIW(record, burnin)
+  # Anything less than the cutoff is set to zero
+  myMat[myMat < cutoff] <- 0.0
+
+  from <- c()
+  to <- c()
+
+  nodes <- data.frame(id=1:numSampled, label=tt$nam)
+  for(i in 1:nrow(myMat)) {
+    for(j in 1:ncol(myMat)) {
+      if (myMat[i,j] > 0.0){
+        from <- c(from, i)
+        to <- c(to, j)
+      }
+    }
+  }
+  width <- rep(edgeWidth, length(from))
+  edges <- data.frame(from = from, to = to, arrows="to", width=width)
+  # Do the plot
+  visNetwork(nodes, edges)%>%
+    visNodes(color=nodeColour, font=list(size=fontSize))
+}
+
+
+#' Dynamic plot of the transmission network with edges weighted according  to likelihood of transmission
 #' @param thisRecord Posterior sample set of transmission trees for all clusters
 #' @param mcmcIndex Sample set index of network to be displayed
 #' @param missLabel Label to be used for missing cases
@@ -60,7 +93,7 @@ getTTreeDistInfo <- function(record,skipnum=1) {
 #' @export
 #' @examples
 #' networkTPlot(record)
-networkTPlot <- function(thisRecord, mcmcIndex=1, missLabel="Unsampled", colours=c('lightblue', 'orange')) {
+networkTPlot <- function(thisRecord, mcmcIndex=1, missLabel="Unsampled", colours=c('lightblue', 'orange'), fontSize=24) {
   #ctree <- thisRecord[[round(length(thisRecord)/2)]]$ctree
   ctree <- thisRecord[[mcmcIndex]]$ctree
   tt <- extractTTree(ctree)
@@ -85,11 +118,11 @@ networkTPlot <- function(thisRecord, mcmcIndex=1, missLabel="Unsampled", colours
     visGroups(groupname = "Sampled", color = "lightblue") %>%
     visGroups(groupname = "Unsampled", color = "orange") %>%
     #visLegend(width = 0.1, position = "left", main = "Legend")%>%
-    visNodes(font = list(size = 24))
+    visNodes(font = list(size = fontSize))
   }
   else{# doesnt work well with just one group!
     visNetwork(nodes, edges)%>%
-      visNodes(font = list(size = 24))#%>%
+      visNodes(font = list(size = fontSize))#%>%
       #visEvents(doubleClick = "itplot_dblclick") # THIS MAKES THE IMAGE DISAPPEAR!
   }
 }
