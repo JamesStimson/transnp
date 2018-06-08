@@ -73,10 +73,10 @@ library(ggplot2)
 
 ```{r}
 aligns <- list()
-aligns <- addAlignment(aligns, "valencia_cluster_CL001.fas")
-aligns <- addAlignment(aligns, "valencia_cluster_CL002.fas")
-aligns <- addAlignment(aligns, "valencia_cluster_CL005.fas")
-aligns <- addAlignment(aligns, "valencia_cluster_CL007.fas")
+aligns <- addAlignment(aligns, "test_cluster_CL001.fas")
+aligns <- addAlignment(aligns, "test_cluster_CL002.fas")
+aligns <- addAlignment(aligns, "test_cluster_CL005.fas")
+aligns <- addAlignment(aligns, "test_cluster_CL007.fas")
 ```
 
 > This gives a list containing the alignments we will model: 
@@ -105,7 +105,7 @@ mltrees[[1]]
 > 2b: Using sample dates, create timed trees using *treedater*.
 
 ```{r, warning = FALSE, messages=FALSE}
-allDates <- read.csv(system.file("extdata", "valencia_dates.csv", package = "transnp", mustWork = TRUE))
+allDates <- read.csv(system.file("extdata", "test_dates.csv", package = "transnp", mustWork = TRUE))
 sampledates <- setUpDates(aligns, allDates)
 timedtrees <- createTimedTrees(mltrees, sampledates, aligns, strictClock = T, meanRateLimits = c(0.3, 0.7))
 ```
@@ -190,7 +190,7 @@ plot_unsampled_cases(record)
 
 
 
-### Individual-level estimes and uncertainty 
+### Individual-level estimates and uncertainty 
 
 > We can also extract individual-level infection times by case, for each cluster: 
 
@@ -207,6 +207,42 @@ maptree1=selectTTree(record[[1]],burnin = 0.5)
 plotCTree(record[[1]][[maptree1]]$ctree)
 ```
 
+> We can overlay specific events on individual-level infection times by case, for each cluster:
+  
+```{r}
+plotInfectionDateDensity(record[[1]], index=1, overlayDate=2015)
+```
+
+### Cluster-level summary information
+
+> Plot transmission network with posterior probabilities at or above given cutoff
+
+```{r}
+plotTransTreeSummary(record[[1]], cutoff=0.1, burnin=0.5) 
+```
+
+### Filter results
+
+> Filter record on specified directed transmission pair
+
+```{r}
+subRecord1 <- filterTransPair(record[[1]], 3, 4)
+```
+
+> Filter record on specified date of infection (before or after) for a particular case
+
+```{r}
+subRecord2 <- filterInfectedDate(record[[1]], case=1, infDate=2015, keepAfter=TRUE)
+```
+
+> Filter record on specified allowable transmission matrix
+
+```{r}
+testMatrix <- matrix(TRUE, 8, 8)
+testMatrix[1,2] <- FALSE
+subRecord3 <- filterPossibleWiw(record[[1]], testMatrix)
+```
+
 ## Acknowledgements
 > Centre for Mathematics of Precision Healthcare, Imperial College London
 
@@ -216,5 +252,5 @@ plotCTree(record[[1]][[maptree1]]$ctree)
 
 ## Notes
 
-transnp is work-in-progress^[On github soon!].
+transnp is work-in-progress^[Now on github!].
 

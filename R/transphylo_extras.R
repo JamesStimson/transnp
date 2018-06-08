@@ -50,10 +50,11 @@ getTTreeDistInfo <- function(record,skipnum=1) {
   return(matList)
 }
 
-#' Plot transmission tree with posterior probabilities at or above given cutoff
+#' Plot transmission network with posterior probabilities at or above given cutoff
 #' @param record  MCMC output produced by inferTTree
 #' @param cutoff  Minimum distance to be included
 #' @param burnin Proportion of record entries to use
+#' @export
 plotTransTreeSummary <- function(record, cutoff=1, burnin=0.5, nodeColour='lightblue', fontSize=24, edgeWidth=1) {
   tt <- extractTTree(record[[1]]$ctree)
   numSampled <- length(tt$nam)
@@ -85,7 +86,7 @@ plotTransTreeSummary <- function(record, cutoff=1, burnin=0.5, nodeColour='light
 
 
 #' Dynamic plot of the transmission network with edges weighted according  to likelihood of transmission
-#' @param thisRecord Posterior sample set of transmission trees for all clusters
+#' @param thisRecord Posterior sample set of transmission trees
 #' @param mcmcIndex Sample set index of network to be displayed
 #' @param missLabel Label to be used for missing cases
 #' @param colours Colours for sampled and unsampled nodes, vector of 2 colours
@@ -168,13 +169,21 @@ ns=sum(!is.na(tt[,2]))
 return(tt[1:ns,1])
 }
 
+#' Get infection dates
+#' @param singleRecord
+#' @param index
+#' @param overlayDate
+#' @return A vector of posterior infection dates
+#' @export
+#' @examples
+#' plotInfectionDateDensity(record, index, date)
 plotInfectionDateDensity <- function(singleRecord, index, overlayDate){
   dateList <- lapply(1:length(singleRecord), function(x) {
     info <- getInfectionDates(singleRecord[[x]]$ctree)[[index]]
     return(info)
   })
   d <- density(as.numeric(dateList))
-  plot(d)
+  plot(d, main='Infection date density')
   abline(v=overlayDate, col='red', lwd=2)
 }
 

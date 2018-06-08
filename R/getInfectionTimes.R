@@ -20,6 +20,7 @@ getInfectionTimes <- function(record,k) {
 #' @param from From case index, either an integer or a string matching one of the case names in the data
 #' @param to To case index, either an integer or a string matching one of the case names in the data
 #' @return Filtered record
+#' @export
 filterTransPair <- function(record, from, to){
   rList <- list()
   count <- 0
@@ -41,6 +42,7 @@ filterTransPair <- function(record, from, to){
 #' @param infDate Date for filtering
 #' @param keepAfter Flag, TRUE to keep cases infected after infDate, FALSE to keep cases infected on or before
 #' @return Filtered record
+#' @export
 filterInfectedDate <- function(record, case, infDate, keepAfter=TRUE){
   rList <- list()
   count <- 0
@@ -59,6 +61,7 @@ filterInfectedDate <- function(record, case, infDate, keepAfter=TRUE){
 #' @param record MCMC output produced by inferTTree
 #' @param pMatrix Matrix of allowable transmissions, TRUE for allowed, FALSE for not allowed
 #' @return Filtered record
+#' @export
 filterPossibleWiw <- function(record, pMatrix){
   rList <- list()
   count <- 0

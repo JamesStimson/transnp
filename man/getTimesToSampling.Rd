@@ -16,5 +16,5 @@ A vector of posterior times to sampling
 Get infection times
 }
 \examples{
-getTimesToSampling(ttree)
+getTimesToSampling(ctree)
 }

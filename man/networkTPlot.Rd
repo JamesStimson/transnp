@@ -2,13 +2,13 @@
 % Please edit documentation in R/transphylo_extras.R
 \name{networkTPlot}
 \alias{networkTPlot}
-\title{dynamic plot of the transmission network with edges weighted according  to likelihood of transmission}
+\title{Dynamic plot of the transmission network with edges weighted according  to likelihood of transmission}
 \usage{
 networkTPlot(thisRecord, mcmcIndex = 1, missLabel = "Unsampled",
-  colours = c("lightblue", "orange"))
+  colours = c("lightblue", "orange"), fontSize = 24)
 }
 \arguments{
-\item{thisRecord}{Posterior sample set of transmission trees for all clusters}
+\item{thisRecord}{Posterior sample set of transmission trees}
 
 \item{mcmcIndex}{Sample set index of network to be displayed}
 
@@ -17,7 +17,7 @@ networkTPlot(thisRecord, mcmcIndex = 1, missLabel = "Unsampled",
 \item{colours}{Colours for sampled and unsampled nodes, vector of 2 colours}
 }
 \description{
-dynamic plot of the transmission network with edges weighted according  to likelihood of transmission
+Dynamic plot of the transmission network with edges weighted according  to likelihood of transmission
 }
 \examples{
 networkTPlot(record)
