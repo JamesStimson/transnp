@@ -7,7 +7,7 @@
 plot_unsampled_cases(cls_record, ...)
 }
 \arguments{
-\item{cls_record}{Posterior sample set of transmission trees for all clusters}
+\item{cls_record}{Posterior sample set of TransPhylo trees for all clusters}
 }
 \description{
 Plot histogram of the number of unsampled cases for each cluster

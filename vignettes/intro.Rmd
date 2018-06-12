@@ -73,10 +73,10 @@ library(ggplot2)
 
 ```{r}
 aligns <- list()
-aligns <- addAlignment(aligns, "test_cluster_CL001.fas")
-aligns <- addAlignment(aligns, "test_cluster_CL002.fas")
-aligns <- addAlignment(aligns, "test_cluster_CL005.fas")
-aligns <- addAlignment(aligns, "test_cluster_CL007.fas")
+aligns <- addAlignment(aligns, "demo_cluster_CL001.fas")
+aligns <- addAlignment(aligns, "demo_cluster_CL002.fas")
+aligns <- addAlignment(aligns, "demo_cluster_CL005.fas")
+aligns <- addAlignment(aligns, "demo_cluster_CL007.fas")
 ```
 
 > This gives a list containing the alignments we will model: 
@@ -105,7 +105,7 @@ mltrees[[1]]
 > 2b: Using sample dates, create timed trees using *treedater*.
 
 ```{r, warning = FALSE, messages=FALSE}
-allDates <- read.csv(system.file("extdata", "test_dates.csv", package = "transnp", mustWork = TRUE))
+allDates <- read.csv(system.file("extdata", "demo_dates.csv", package = "transnp", mustWork = TRUE))
 sampledates <- setUpDates(aligns, allDates)
 timedtrees <- createTimedTrees(mltrees, sampledates, aligns, strictClock = T, meanRateLimits = c(0.3, 0.7))
 ```

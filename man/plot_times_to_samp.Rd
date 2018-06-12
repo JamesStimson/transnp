@@ -7,7 +7,7 @@
 plot_times_to_samp(cls_record, ...)
 }
 \arguments{
-\item{cls_record}{Posterior sample set of transmission trees for all clusters}
+\item{cls_record}{Posterior sample set of TransPhylo trees for all clusters}
 
 \item{...}{parameters to be passed to grid.arrange}
 }

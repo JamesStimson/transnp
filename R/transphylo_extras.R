@@ -86,7 +86,7 @@ plotTransTreeSummary <- function(record, cutoff=1, burnin=0.5, nodeColour='light
 
 
 #' Dynamic plot of the transmission network with edges weighted according  to likelihood of transmission
-#' @param thisRecord Posterior sample set of transmission trees
+#' @param thisRecord Posterior sample set of TransPhylo trees
 #' @param mcmcIndex Sample set index of network to be displayed
 #' @param missLabel Label to be used for missing cases
 #' @param colours Colours for sampled and unsampled nodes, vector of 2 colours
@@ -129,7 +129,7 @@ networkTPlot <- function(thisRecord, mcmcIndex=1, missLabel="Unsampled", colours
 }
 
 #' Plot histogram of generation times for each cluster
-#' @param cls_record Posterior sample set of transmission trees for all clusters
+#' @param cls_record Posterior sample set of TransPhylo trees for all clusters
 #' @param ... parameters to be passed to grid.arrange
 #' @return NULL
 #' @export
@@ -170,9 +170,9 @@ return(tt[1:ns,1])
 }
 
 #' Get infection dates
-#' @param singleRecord
-#' @param index
-#' @param overlayDate
+#' @param singleRecord Posterior sample set of TransPhylo trees
+#' @param index Index of case
+#' @param overlayDate Date to overlay on graph
 #' @return A vector of posterior infection dates
 #' @export
 #' @examples
@@ -188,7 +188,7 @@ plotInfectionDateDensity <- function(singleRecord, index, overlayDate){
 }
 
 #' Plot histogram of times to sampling for each cluster
-#' @param cls_record Posterior sample set of transmission trees for all clusters
+#' @param cls_record Posterior sample set of TransPhylo trees for all clusters
 #' @param ... parameters to be passed to grid.arrange
 #' @return NULL
 #' @export
@@ -203,7 +203,7 @@ plot_times_to_samp <- function(cls_record, ...){
 }
 
 #' Plot histogram of the number of unsampled cases for each cluster
-#' @param cls_record Posterior sample set of transmission trees for all clusters
+#' @param cls_record Posterior sample set of TransPhylo trees for all clusters
 #' @return NULL
 #' @export
 plot_unsampled_cases <- function(cls_record, ...){

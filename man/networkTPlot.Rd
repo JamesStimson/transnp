@@ -8,7 +8,7 @@ networkTPlot(thisRecord, mcmcIndex = 1, missLabel = "Unsampled",
   colours = c("lightblue", "orange"), fontSize = 24)
 }
 \arguments{
-\item{thisRecord}{Posterior sample set of transmission trees}
+\item{thisRecord}{Posterior sample set of TransPhylo trees}
 
 \item{mcmcIndex}{Sample set index of network to be displayed}
 
