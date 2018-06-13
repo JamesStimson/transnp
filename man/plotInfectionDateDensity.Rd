@@ -2,7 +2,7 @@
 % Please edit documentation in R/transphylo_extras.R
 \name{plotInfectionDateDensity}
 \alias{plotInfectionDateDensity}
-\title{Get infection dates}
+\title{Plot infection date density for chosen case}
 \usage{
 plotInfectionDateDensity(singleRecord, index, overlayDate)
 }
@@ -17,7 +17,7 @@ plotInfectionDateDensity(singleRecord, index, overlayDate)
 A vector of posterior infection dates
 }
 \description{
-Get infection dates
+Plot infection date density for chosen case
 }
 \examples{
 plotInfectionDateDensity(record, index, date)

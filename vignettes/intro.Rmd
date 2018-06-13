@@ -32,23 +32,39 @@ options(readr.show_progress = FALSE)
 
 > The available functions in *transnp* are:
 
-**addAlignment**: add to a list of alignments from fasta files.
+**addAlignment**: add to a list of alignments from fasta files
 
-**setUpDates**: create list of dates to match alignments.
+**setUpDates**: create list of dates to match alignments
 
-**createMLTrees**: creates a list of maximum likelihood estimated trees from a list of alignments. Uses *phangorn* and *phytools*.
+**createMLTrees**: creates a list of maximum likelihood estimated trees from a list of alignments. Uses *phangorn* and *phytools*
 
-**createTimedTrees**: creates a list of timed trees from a list of trees and their sample dates. Uses *treedater*.
+**createTimedTrees**: creates a list of timed trees from a list of trees and their sample dates. Uses *treedater*
 
-**infer_multiTTree_shareParam**: creates a set of transmission trees which are jointly inferred from timed trees. Uses *TransPhylo*.
+**infer_multiTTree_shareParam**: creates a set of transmission trees which are jointly inferred from timed trees. Uses *TransPhylo*
 
-**networkTPlot**: makes dynamic plot of a *TransPhylo* transmission tree showing unsampled cases.
+**networkTPlot**: makes dynamic plot of a *TransPhylo* transmission tree showing unsampled cases
 
-**plot_gen_times**: plot histogram of generation times for each cluster.
+**plot_gen_times**: plot histogram of generation times for each cluster
 
-**plot_times_to_samp**: plot histogram of times to sampling for each cluster.
+**plot_times_to_samp**: plot histogram of times to sampling for each cluster
 
-**plot_unsmapled_cases**: plot histogram of the number of unsampled cases for each cluster.
+**plot_unsampled_cases**: plot histogram of the number of unsampled cases for each cluster
+
+**plotGenerationTimeDensity**: plot generation time density for chosen case
+
+**plotInfectionDateDensity**: plot infection date density for chosen case
+
+**plotSampleTimeDensity**: plot time to sampling (from infection) for chosen case
+
+**plotTransTreeSummary**: plot transmission network with posterior probabilities at or above given cutoff 
+
+**filterInfectedDate**: filter record on specified date of infection
+
+**filterPossibleWiw**: filter record on specified allowable transmission matrix
+
+**filterTransPair**: filter record on specified directed transmission pair 
+
+**getLikelyInfectors**: extract infection likelihoods for a given case
 
 > Load packages:
 
@@ -207,11 +223,30 @@ maptree1=selectTTree(record[[1]],burnin = 0.5)
 plotCTree(record[[1]][[maptree1]]$ctree)
 ```
 
+> Generation time density for a given individual
+
+```{r}
+plotGenerationTimeDensity(record[[1]], index=2)
+```
+
+> Infection-to-sample time density for a given individual
+
+```{r}
+plotSampleTimeDensity(record[[1]], index=2)
+```
+
 > We can overlay specific events on individual-level infection times by case, for each cluster:
   
 ```{r}
 plotInfectionDateDensity(record[[1]], index=1, overlayDate=2015)
 ```
+
+> We can extract likehoods of infector for a given case
+
+```{r}
+getLikelyInfectors(record[[1]], 'c405')
+```
+
 
 ### Cluster-level summary information
 

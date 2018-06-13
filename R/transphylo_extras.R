@@ -84,6 +84,17 @@ plotTransTreeSummary <- function(record, cutoff=1, burnin=0.5, nodeColour='light
     visNodes(color=nodeColour, font=list(size=fontSize))
 }
 
+#' Get infection likelihoods for a given case
+#' @param record  MCMC output produced by inferTTree
+#' @param case  Index or label can be supplied
+#' @param burnin Proportion of record entries to use
+#' @export
+getLikelyInfectors <- function(record, case, burnin=0.5){
+  # Who-infected-who matrix from TransPhylo
+  myMat <- computeMatWIW(record, burnin)
+  return(myMat[,case])
+}
+
 
 #' Dynamic plot of the transmission network with edges weighted according  to likelihood of transmission
 #' @param thisRecord Posterior sample set of TransPhylo trees
@@ -169,7 +180,7 @@ ns=sum(!is.na(tt[,2]))
 return(tt[1:ns,1])
 }
 
-#' Get infection dates
+#' Plot infection date density for chosen case
 #' @param singleRecord Posterior sample set of TransPhylo trees
 #' @param index Index of case
 #' @param overlayDate Date to overlay on graph
@@ -183,8 +194,40 @@ plotInfectionDateDensity <- function(singleRecord, index, overlayDate){
     return(info)
   })
   d <- density(as.numeric(dateList))
-  plot(d, main='Infection date density')
+  plot(d, main=paste0('Infection date density for ', singleRecord[[1]]$ctree$nam[[index]]))
   abline(v=overlayDate, col='red', lwd=2)
+}
+
+#' Plot generation time density for chosen case
+#' @param singleRecord Posterior sample set of TransPhylo trees
+#' @param index Index of case
+#' @return A vector of posterior generation times
+#' @export
+#' @examples
+#' plotGenerationTimeDensity(record, index)
+plotGenerationTimeDensity <- function(singleRecord, index){
+  dateList <- lapply(1:length(singleRecord), function(x) {
+    info <- getGenerationTimes(singleRecord[[x]]$ctree)[[index]]
+    return(info)
+  })
+  d <- density(as.numeric(dateList))
+  plot(d, main=paste0('Generation time density for ', singleRecord[[1]]$ctree$nam[[index]]))
+}
+
+#' Plot time to sampling (from infection) for chosen case
+#' @param singleRecord Posterior sample set of TransPhylo trees
+#' @param index Index of case
+#' @return A vector of posterior times
+#' @export
+#' @examples
+#' plotSampleTimeDensity(record, index)
+plotSampleTimeDensity <- function(singleRecord, index){
+  dateList <- lapply(1:length(singleRecord), function(x) {
+    info <- getTimesToSampling(singleRecord[[x]]$ctree)[[index]]
+    return(info)
+  })
+  d <- density(as.numeric(dateList))
+  plot(d, main=paste0('Sample time density for ', singleRecord[[1]]$ctree$nam[[index]]))
 }
 
 #' Plot histogram of times to sampling for each cluster
