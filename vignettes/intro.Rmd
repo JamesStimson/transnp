@@ -40,7 +40,13 @@ options(readr.show_progress = FALSE)
 
 **createTimedTrees**: creates a list of timed trees from a list of trees and their sample dates. Uses *treedater*
 
-**infer_multiTTree_shareParam**: creates a set of transmission trees which are jointly inferred from timed trees. Uses *TransPhylo*
+**simulTransTrees**: creates a set of transmission trees which are jointly inferred from timed trees. Uses *TransPhylo*
+
+**getLikelyInfectors**: extract infection likelihoods for a given case
+
+**getInfectionTimes**: extract infection times for a given case
+
+> Plotting and visualisation
 
 **networkTPlot**: makes dynamic plot of a *TransPhylo* transmission tree showing unsampled cases
 
@@ -58,15 +64,17 @@ options(readr.show_progress = FALSE)
 
 **plotTransTreeSummary**: plot transmission network with posterior probabilities at or above given cutoff 
 
+> Filtering on posterior records
+
 **filterInfectedDate**: filter record on specified date of infection
 
 **filterPossibleWiw**: filter record on specified allowable transmission matrix
 
 **filterTransPair**: filter record on specified directed transmission pair 
 
-**getLikelyInfectors**: extract infection likelihoods for a given case
+## Package dependencies
 
-> Load packages:
+> Load libraries:
 
 ```{r, message=FALSE,results="hide"}
 library(transnp)
@@ -78,6 +86,7 @@ library(phytools)
 library(gridExtra)
 library(purrr)
 library(ggplot2)
+library(visNetwork)
 ```
 <br>
 
@@ -137,14 +146,12 @@ timedtrees <- createTimedTrees(mltrees, sampledates, aligns, strictClock = T, me
 ```{r,quiet=TRUE,results="hide"}
 nIter <- 1000
 tpTimedTrees <- list()
-# Convert trees from phylo to TransPhylo format
-#for (i in seq(length(timedtrees))){
-#  tpTimedTrees[[i]] <- ptreeFromPhylo(timedtrees[[i]], max(sampledates[[i]]))
-#}
+
 maxDate <- max(unlist(lapply(sampledates, function(dateList) {return(max(dateList))})))
 tpTimedTrees <- lapply(timedtrees, function(tree) {return(ptreeFromPhylo(tree, maxDate))}) 
 
-record <- infer_multiTTree_shareParam(tpTimedTrees, share=c("neg","off.r","off.p","pi"), mcmcIterations=nIter, startNeg=1, startOff.p = 0.8, startOff.r = 1, startPi=0.9, updateNeg = T, updatePi = F, updateOff.p=FALSE)
+#listRecords <- infer_multiTTree_shareParam(tpTimedTrees, share=c("neg","off.r","off.p","pi"), mcmcIterations=nIter, startNeg=1, startOff.p = 0.8, startOff.r = 1, startPi=0.9, updateNeg = T, updatePi = F, updateOff.p=FALSE)
+listRecords <- simulTransTrees(tpTimedTrees, mean_gen=2, stddev_gen=sqrt(2), mean_sample=2, stddev_sample=sqrt(2), share=c("neg","off.r","off.p","pi"), mcmcIterations=nIter, startNeg=1, startOff.p = 0.8, startOff.r = 1, startPi=0.9, updateNeg = T, updatePi = F, updateOff.p=FALSE)
 ```
 
 > The result is a list of records, one for each cluster. The `record` object contains the inferred transmission trees. 
@@ -156,15 +163,14 @@ record <- infer_multiTTree_shareParam(tpTimedTrees, share=c("neg","off.r","off.p
 > *Combined tree using TransPhylo*. In this tree, each colour corresponds to a host. Colours that don't end up at a tip represent inferred unsampled cases. Note that this Bayesian analysis produces a collection of possible transmission trees. Here we show the one with highest posterior probability, for cluster 4. 
 
 ```{r}
-maptree <- selectTTree(record[[4]],burnin = 0.3)
-plotCTree(record[[4]][[maptree]]$ctree)
+maptree <- selectTTree(listRecords[[4]],burnin = 0.3)
+plotCTree(listRecords[[4]][[maptree]]$ctree)
 ```
 
 > Plot of the maximum posterior probability transmission tree; we use *visNetwork* for the visualisation.
 
 ```{r}
-library(visNetwork)
-networkTPlot(record[[4]], mcmcIndex=nIter-10, missLabel="Missed", colours=c('lightblue', 'orange'))
+networkTPlot(listRecords[[4]], mcmcIndex=nIter-10, missLabel="Missed", colours=c('lightblue', 'orange'))
 ```
 
 > The thicker edges have higher probability - these transmission events are more certain. Here, there is a fairly high probability that G108 infected G260. We do not have a likely infector for G1350. 
@@ -173,7 +179,7 @@ networkTPlot(record[[4]], mcmcIndex=nIter-10, missLabel="Missed", colours=c('lig
 > Here is a different plot, for Cluster 2, showing different colour options. 
 
 ```{r}
-networkTPlot(record[[2]], mcmcIndex=nIter, missLabel="Missed", colours=c('blue', 'orange'))
+networkTPlot(listRecords[[2]], mcmcIndex=nIter, missLabel="Missed", colours=c('blue', 'orange'))
 ```
 
 ### How do the clusters compare to each other? 
@@ -181,8 +187,8 @@ networkTPlot(record[[2]], mcmcIndex=nIter, missLabel="Missed", colours=c('blue',
 > We can plot distribution of generation times (one infection to the next) from the posterior.
 
 ```{r}
-names(record) = c("Cluster1", "Cluster2", "Cluster5", "Cluster7")
-plot_gen_times(record)
+names(listRecords) = c("Cluster1", "Cluster2", "Cluster5", "Cluster7")
+plot_gen_times(listRecords)
 ```
 
 > Clusters 1 and 5 contain some long times, suggesting cases that could have been intermittently infectious or non-infectious for a longer period. Cluster 2 seems to be moving faster. 
@@ -191,7 +197,7 @@ plot_gen_times(record)
 > Times from getting infected to getting sampled, showing differences between clusters
 
 ```{r}
-plot_times_to_samp(record)
+plot_times_to_samp(listRecords)
 ```
 
 > The same pattern is mirrored in the times to sampling
@@ -199,7 +205,7 @@ plot_times_to_samp(record)
 > How many unsampled cases are estimated in the clusters? 
 
 ```{r}
-plot_unsampled_cases(record)
+plot_unsampled_cases(listRecords)
 ```
 
 > Higher numbers in clusters 1 and 5 reflect longer branches and fewer intermediate cases 
@@ -211,40 +217,40 @@ plot_unsampled_cases(record)
 > We can also extract individual-level infection times by case, for each cluster: 
 
 ```{r}
-gt11=getInfectionTimes(record[[1]][300:1000],7)
-name1=record[[1]][[1000]]$ctree$nam[7]
+gt11=getInfectionTimes(listRecords[[1]][300:1000],7)
+name1=listRecords[[1]][[1000]]$ctree$nam[7]
 hist(gt11,breaks=15,xlab = paste("estimated time of infection for", name1),main = "")
 ```
 
-> The timing of infection depends on who infected whom and on the timed tree.   
+> The timing of infection depends on who infected whom and on the timed tree   
   
 ```{r}
-maptree1=selectTTree(record[[1]],burnin = 0.5)
-plotCTree(record[[1]][[maptree1]]$ctree)
+maptree1=selectTTree(listRecords[[1]],burnin = 0.5)
+plotCTree(listRecords[[1]][[maptree1]]$ctree)
 ```
 
-> Generation time density for a given individual
+> Generation time (time from being infected to infecting next case) density for a given individual
 
 ```{r}
-plotGenerationTimeDensity(record[[1]], index=2)
+plotGenerationTimeDensity(listRecords[[1]], index=2)
 ```
 
 > Infection-to-sample time density for a given individual
 
 ```{r}
-plotSampleTimeDensity(record[[1]], index=2)
+plotSampleTimeDensity(listRecords[[1]], index=2)
 ```
 
 > We can overlay specific events on individual-level infection times by case, for each cluster:
   
 ```{r}
-plotInfectionDateDensity(record[[1]], index=1, overlayDate=2015)
+plotInfectionDateDensity(listRecords[[1]], index=1, overlayDate=2015)
 ```
 
 > We can extract likehoods of infector for a given case
 
 ```{r}
-getLikelyInfectors(record[[1]], 'c405')
+getLikelyInfectors(listRecords[[1]], 'c405')
 ```
 
 
@@ -253,7 +259,7 @@ getLikelyInfectors(record[[1]], 'c405')
 > Plot transmission network with posterior probabilities at or above given cutoff
 
 ```{r}
-plotTransTreeSummary(record[[1]], cutoff=0.1, burnin=0.5) 
+plotTransTreeSummary(listRecords[[1]], cutoff=0.1, burnin=0.5) 
 ```
 
 ### Filter results
@@ -261,21 +267,21 @@ plotTransTreeSummary(record[[1]], cutoff=0.1, burnin=0.5)
 > Filter record on specified directed transmission pair
 
 ```{r}
-subRecord1 <- filterTransPair(record[[1]], 3, 4)
+subRecord1 <- filterTransPair(listRecords[[1]], from=3, to=4)
 ```
 
 > Filter record on specified date of infection (before or after) for a particular case
 
 ```{r}
-subRecord2 <- filterInfectedDate(record[[1]], case=1, infDate=2015, keepAfter=TRUE)
+subRecord2 <- filterInfectedDate(listRecords[[1]], case=1, infDate=2015, keepAfter=TRUE)
 ```
 
-> Filter record on specified allowable transmission matrix
+> Filter record on specified logical matrix, which specifies who can infect who. Record entries are kept only where infection events correspond to a TRUE entry in the testMatrix. 
 
 ```{r}
 testMatrix <- matrix(TRUE, 8, 8)
 testMatrix[1,2] <- FALSE
-subRecord3 <- filterPossibleWiw(record[[1]], testMatrix)
+subRecord3 <- filterPossibleWiw(listRecords[[1]], testMatrix)
 ```
 
 ## Acknowledgements

@@ -85,7 +85,6 @@ createTimedTrees <- function(mltrees, sampledates, alist, strictClock = T, meanR
 #' @param optNni (TRUE) optimise the topology of the tree
 #' @param ... further parameters for optim.pml
 #' @return tree object of type phylo
-#' @export
 #' @examples test=estimatetree(aln)
 #' myModel <- setDatesFromFile(myModel, datefile)
 estimatetree <- function(aln, maxit=10000, optNni=TRUE, bf=basefreqs, ...) {
@@ -195,7 +194,6 @@ simulTransTrees = function(timedTrees, mean_gen=1, stddev_gen=1, mean_sample=1, 
 #' @param dateT Date when process stops (this can be Inf for fully simulated outbreaks)
 #' @return posterior sample set of transmission trees for all clusters
 #' @author Yuanwei Xu
-#' @export
 infer_multiTTree_shareParam = function(ptree_lst,w.shape=2,w.scale=1,ws.shape=w.shape,ws.scale=w.scale,mcmcIterations=1000,
                                        thinning=1,startNeg=100/365,startOff.r=1,startOff.p=0.5,startPi=0.5,
                                        updateNeg=TRUE,updateOff.r=TRUE,updateOff.p=FALSE,updatePi=TRUE,
