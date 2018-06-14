@@ -1,34 +1,5 @@
-# Note latest gthub TransPhylo needed
+# Note latest github TransPhylo needed
 # install_github("xavierdidelot/TransPhylo")
-
-#' add alignments to list
-#' @param alist (possibly empty) list of alignments in DNAbin format
-#' @param fileName fasta file name
-#' @return list of alignments
-#' @export
-addAlignment <- function(alist, fileName){
-  alignment <- read.dna(system.file("extdata", fileName, package = "transnp", mustWork = TRUE), format="fasta")
-  alist[[length(alist)+1]] <- alignment
-  return (alist)
-}
-
-#' create list of dates to match alignments
-#' @param alist (possibly empty) list of alignments in DNAbin format
-#' @param allDates data frame containg all IDs and dates as read from a csv file
-#' @return list of dates
-#' @export
-setUpDates <- function(alist, allDates){
-  dateList <- list()
-  for (align in alist){
-    theseDates <- numeric(length(labels(align)))
-    for (i in seq(length(labels(align)))){
-      theseDates[[i]] <- allDates[match(labels(align)[[i]], allDates[,1]), 2]
-    }
-    dateList[[length(dateList)+1]] <- theseDates
-  }
-  return(dateList)
-}
-
 
 #' create maximum likelihood trees from a list of alignments
 #' @param alist list of alignments in DNAbin format

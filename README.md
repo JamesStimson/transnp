@@ -19,7 +19,7 @@ devtools::install_github("JamesStimson/transnp", build_vignettes = TRUE)
 
 To view the vignette once installed, run
 ```{r}
-vignette("how-to-guide", package = "transnp")
+vignette("intro", package = "transnp")
 ```
 
 Alternatively, you can run the R markdown *vignettes/intro.Rmd* yourself.
