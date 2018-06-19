@@ -37,9 +37,7 @@ aligns[[1]]
 basefreqs <- c(0.1719, 0.3286, 0.3276, 0.1719)
 set.seed(12345)
 mltrees <- createMLTrees(aligns, bf=basefreqs)
-# Alternatively, mltrees=lapply(aligns, function(x) estimate.tree(x, bf = basefreqs, maxit=10000,optQ=TRUE, optNni=TRUE))
 par(mfrow=c(2,2)); lapply(mltrees,function(tree) {plot(tree); add.scale.bar()}); par(mfrow=c(1,1))
-# Improvement to do: coerce plots to increase height and width to show labels better
 
 ## ------------------------------------------------------------------------
 mltrees[[1]]
@@ -101,16 +99,30 @@ plotInfectionDateDensity(listRecords[[1]], index=1, overlayDate=2015)
 getLikelyInfectors(listRecords[[1]], 'c405')
 
 ## ------------------------------------------------------------------------
-plotTransTreeSummary(listRecords[[1]], cutoff=0.1, burnin=0.5) 
+plotTransTreeSummary(listRecords[[2]], cutoff=0.2, burnin=0.5) 
 
 ## ------------------------------------------------------------------------
-subRecord1 <- filterTransPair(listRecords[[1]], from=3, to=4)
+subRecord1 <- filterTransPair(listRecords[[2]], from='c674', to='c1608')
+plotTransTreeSummary(subRecord1, cutoff=0.2, burnin=0.5) 
 
 ## ------------------------------------------------------------------------
-subRecord2 <- filterInfectedDate(listRecords[[1]], case=1, infDate=2015, keepAfter=TRUE)
+subRecord2 <- filterInfectedDate(listRecords[[2]], case='c1608', infDate=2013.5, keepAfter=TRUE)
+plotTransTreeSummary(subRecord2, cutoff=0.2, burnin=0.5, nodeColour='orange' )
 
 ## ------------------------------------------------------------------------
-testMatrix <- matrix(TRUE, 8, 8)
-testMatrix[1,2] <- FALSE
-subRecord3 <- filterPossibleWiw(listRecords[[1]], testMatrix)
+subRecord2b <- filterInfectedDate(listRecords[[2]], case='c1608', infDate=2014.5, keepAfter=TRUE)
+plotTransTreeSummary(subRecord2b, cutoff=0.2, burnin=0.5, nodeColour='green' )
+
+## ------------------------------------------------------------------------
+name_list <- listRecords[[2]][[1]]$ctree$nam
+name_dim <- length(name_list)
+testMatrix <- matrix(TRUE, name_dim, name_dim)
+testMatrix[10,8] <- FALSE
+testMatrix[8,10] <- FALSE
+name_list[[8]]
+name_list[[10]]
+
+## ------------------------------------------------------------------------
+subRecord3 <- filterPossibleWiw(listRecords[[2]], testMatrix)
+plotTransTreeSummary(subRecord3, cutoff=0.2, burnin=0.5, nodeColour='pink' )
 

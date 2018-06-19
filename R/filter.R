@@ -19,16 +19,17 @@ getInfectionTimes <- function(record,k) {
 #' @param record MCMC output produced by inferTTree
 #' @param from From case index, either an integer or a string matching one of the case names in the data
 #' @param to To case index, either an integer or a string matching one of the case names in the data
+#' @param include FALSE means remove given pair, TRUE means only include given pair
 #' @return Filtered record
 #' @export
-filterTransPair <- function(record, from, to){
+filterTransPair <- function(record, from, to, include=FALSE){
   rList <- list()
   count <- 0
   for  (entry in record){
     tt <- extractTTree(entry$ctree)
     if(!is.numeric(from)) from <- which(tt$nam==from)
     if(!is.numeric(to)) to <- which(tt$nam==to)
-    if (tt$ttree[to, 3] == from){
+    if ((include && (tt$ttree[to, 3] == from)) || (!include && (tt$ttree[to, 3] != from))){
       count <- count + 1
       rList[[count]] <- entry
     }
@@ -70,7 +71,7 @@ filterPossibleWiw <- function(record, pMatrix){
     allow <- TRUE
     for (i in seq(1:length(tt$nam))){
       infector <- tt$ttree[i,3]
-      if (infector > length(tt$nam)) next
+      if ((infector == 0) || (infector > length(tt$nam))) next
       if (!pMatrix[tt$ttree[i,3], i]){
         allow <- FALSE
         break

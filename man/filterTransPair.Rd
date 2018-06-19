@@ -4,7 +4,7 @@
 \alias{filterTransPair}
 \title{Filter record on specified directed transmission pair}
 \usage{
-filterTransPair(record, from, to)
+filterTransPair(record, from, to, include = FALSE)
 }
 \arguments{
 \item{record}{MCMC output produced by inferTTree}
@@ -12,6 +12,8 @@ filterTransPair(record, from, to)
 \item{from}{From case index, either an integer or a string matching one of the case names in the data}
 
 \item{to}{To case index, either an integer or a string matching one of the case names in the data}
+
+\item{include}{FALSE means remove given pair, TRUE means only include given pair}
 }
 \value{
 Filtered record

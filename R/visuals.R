@@ -40,6 +40,9 @@ plotTransTreeSummary <- function(record, cutoff=1, burnin=0.5, nodeColour='light
     }
   }
   width <- rep(edgeWidth, length(from))
+  for (w in seq(length(width))){
+    width[w] <- 10*getMat(from[[w]], to[[w]], myMat)
+  }
   edges <- data.frame(from = from, to = to, arrows="to", width=width)
   # Do the plot
   visNetwork(nodes, edges)%>%
