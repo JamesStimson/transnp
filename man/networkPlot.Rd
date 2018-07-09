@@ -7,7 +7,7 @@
 networkPlot(ctree)
 }
 \arguments{
-\item{ctree}{Combined tree object 'ctree' from the record produced by inferTTree, for example record[[1]]$ctree where record is the output of inferTTree}
+\item{ctree}{Combined tree object 'ctree' from the record produced by inferTTree}
 }
 \description{
 Simple visualisation of transmission tree with visNetwork

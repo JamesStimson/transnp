@@ -285,7 +285,7 @@ subRecord2b <- filterInfectedDate(listRecords[[2]], case='c1608', infDate=2014.5
 plotTransTreeSummary(subRecord2b, cutoff=0.2, burnin=0.5, nodeColour='green' )
 ```
 
-> Filter record on specified logical matrix, which specifies who can infect who. Record entries are kept only where infection events correspond to a TRUE entry in the testMatrix. 
+> Filter record on specified logical matrix, which specifies who can infect whom. Record entries are kept only where infection events correspond to a TRUE entry in the testMatrix. 
 
 ```{r}
 name_list <- listRecords[[2]][[1]]$ctree$nam
@@ -311,5 +311,5 @@ plotTransTreeSummary(subRecord3, cutoff=0.2, burnin=0.5, nodeColour='pink' )
 
 ## Notes
 
-transnp is work-in-progress^[Now on github!].
+Last updated June 2018.
 

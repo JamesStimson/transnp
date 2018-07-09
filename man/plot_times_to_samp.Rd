@@ -4,10 +4,12 @@
 \alias{plot_times_to_samp}
 \title{Plot histogram of times to sampling for each cluster}
 \usage{
-plot_times_to_samp(cls_record, ...)
+plot_times_to_samp(cls_record, burnin = 0.5, ...)
 }
 \arguments{
-\item{cls_record}{Posterior sample set of TransPhylo trees for all clusters}
+\item{cls_record}{Posterior MCMC sample set from TransPhylo for all clusters}
+
+\item{burnin}{Proportion of the MCMC output to be discarded as burnin}
 
 \item{...}{parameters to be passed to grid.arrange}
 }

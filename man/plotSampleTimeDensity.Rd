@@ -4,12 +4,14 @@
 \alias{plotSampleTimeDensity}
 \title{Plot time to sampling (from infection) for chosen case}
 \usage{
-plotSampleTimeDensity(singleRecord, index)
+plotSampleTimeDensity(singleRecord, index, burnin = 0.5)
 }
 \arguments{
-\item{singleRecord}{Posterior sample set of TransPhylo trees}
+\item{singleRecord}{Posterior MCMC sample set from TransPhylo}
 
 \item{index}{Index of case}
+
+\item{burnin}{Proportion of the MCMC output to be discarded as burnin}
 }
 \value{
 A vector of posterior times

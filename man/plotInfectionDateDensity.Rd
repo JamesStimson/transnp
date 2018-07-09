@@ -4,12 +4,14 @@
 \alias{plotInfectionDateDensity}
 \title{Plot infection date density for chosen case}
 \usage{
-plotInfectionDateDensity(singleRecord, index, overlayDate)
+plotInfectionDateDensity(singleRecord, index, burnin = 0.5, overlayDate)
 }
 \arguments{
-\item{singleRecord}{Posterior sample set of TransPhylo trees}
+\item{singleRecord}{Posterior MCMC sample set from TransPhylo}
 
 \item{index}{Index of case}
+
+\item{burnin}{Proportion of the MCMC output to be discarded as burnin}
 
 \item{overlayDate}{Date to overlay on graph}
 }

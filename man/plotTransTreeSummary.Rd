@@ -5,14 +5,18 @@
 \title{Plot transmission network with posterior probabilities at or above given cutoff}
 \usage{
 plotTransTreeSummary(record, cutoff = 1, burnin = 0.5,
-  nodeColour = "lightblue", fontSize = 24, edgeWidth = 1)
+  nodeColour = "lightblue", fontSize = 24)
 }
 \arguments{
-\item{record}{MCMC output produced by inferTTree}
+\item{record}{Posterior MCMC sample set from TransPhylo}
 
-\item{cutoff}{Minimum distance to be included}
+\item{cutoff}{Minimum probabilty for edge to be included}
 
-\item{burnin}{Proportion of record entries to use}
+\item{burnin}{Proportion of the MCMC output to be discarded as burnin}
+
+\item{nodeColour}{Colour for all nodes}
+
+\item{fontSize}{Font side for node labels}
 }
 \description{
 Plot transmission network with posterior probabilities at or above given cutoff

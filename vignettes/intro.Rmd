@@ -182,7 +182,7 @@ networkTPlot(listRecords[[2]], mcmcIndex=nIter, missLabel="Missed", colours=c('b
 
 ### How do the clusters compare to each other? 
 
-> We can plot distribution of generation times (one infection to the next) from the posterior.
+> We can plot the distribution of generation times (times from one infection to the next) from the posterior. But note that the generation times included are those where an infected case (infectee) is itself sampled or is ancestral (in the sense of transmissions) to another case which is sampled. If an infectee is unsampled, as well as all of its descendants by transmission being unsampled, those generation times are not included.   
 
 ```{r}
 names(listRecords) = c("Cluster1", "Cluster2", "Cluster5", "Cluster7")
@@ -210,9 +210,9 @@ plot_unsampled_cases(listRecords)
 
 
 
-### Individual-level estimates and uncertainty 
+### What information can we see for a given individual? 
 
-> We can also extract individual-level infection times by case, for each cluster: 
+> We can extract individual-level infection times by case, for each cluster: 
 
 ```{r}
 gt11=getInfectionTimes(listRecords[[1]][300:1000],7)
@@ -239,7 +239,7 @@ plotGenerationTimeDensity(listRecords[[1]], index=2)
 plotSampleTimeDensity(listRecords[[1]], index=2)
 ```
 
-> We can overlay specific events on individual-level infection times by case, for each cluster:
+> We can overlay specific events on individual-level infection times by case:
   
 ```{r}
 plotInfectionDateDensity(listRecords[[1]], index=1, overlayDate=2015)
@@ -248,30 +248,32 @@ plotInfectionDateDensity(listRecords[[1]], index=1, overlayDate=2015)
 > We can extract likehoods of infector for a given case
 
 ```{r}
-getLikelyInfectors(listRecords[[1]], 'c405')
+caseName <- 'c405'
+infectors <- getLikelyInfectors(listRecords[[1]], caseName)
+barplot(infectors[-which(names(infectors) == caseName)])
 ```
 
 
-### Cluster-level summary information
+### What summary information can we show for a given cluster?  
 
-> Plot of transmission network with posterior probabilities at or above given cutoff. Edges are weighted in proportion to the probability of transmission.
+> Plot of transmission network with posterior probabilities at or above given cutoff. Edges are weighted in proportion to the probability of transmission. Hover over an edge to see its probability!
 
 ```{r}
 plotTransTreeSummary(listRecords[[2]], cutoff=0.2, burnin=0.5) 
 ```
 
-### Apply additional knowledge not captured in the model
+### Refine the results using additional knowledge
 
-Epidemiological data may be gathered which adds information which is not modelled. It might be known, for example, that patient A could not have infected patient B (even indirectly) because they were known to living in geographically isolated locations.
+We have epidemiological data which adds information but is not explicity captured in the model parameters. It might be known, for example, that patient A could not have infected patient B (even indirectly) because they were known to living in geographically isolated locations.
 
-> Filter record on a specified directed transmission pair. From previous example, we impose that c674 cannot infect c1608.
+> Filter record on a specified directed transmission pair. From the previous example, we impose the condition that c674 cannot infect c1608.
 
 ```{r}
 subRecord1 <- filterTransPair(listRecords[[2]], from='c674', to='c1608')
 plotTransTreeSummary(subRecord1, cutoff=0.2, burnin=0.5) 
 ```
 
-> Filter record on specified date of infection (before or after, depending on the keepAfter flag) for a particular case
+> Filter record on specified date of infection (before or after, depending on the keepAfter flag for a particular case:
 
 ```{r}
 subRecord2 <- filterInfectedDate(listRecords[[2]], case='c1608', infDate=2013.5, keepAfter=TRUE)
@@ -285,7 +287,7 @@ subRecord2b <- filterInfectedDate(listRecords[[2]], case='c1608', infDate=2014.5
 plotTransTreeSummary(subRecord2b, cutoff=0.2, burnin=0.5, nodeColour='green' )
 ```
 
-> Filter record on specified logical matrix, which specifies who can infect who. Record entries are kept only where infection events correspond to a TRUE entry in the testMatrix. 
+> Filter record on specified logical matrix, which specifies who can infect whom. Record entries are kept only where infection events correspond to a TRUE entry in the testMatrix. 
 
 ```{r}
 name_list <- listRecords[[2]][[1]]$ctree$nam
@@ -311,5 +313,5 @@ plotTransTreeSummary(subRecord3, cutoff=0.2, burnin=0.5, nodeColour='pink' )
 
 ## Notes
 
-transnp is work-in-progress^[Now on github!].
+Last updated June 2018.
 
